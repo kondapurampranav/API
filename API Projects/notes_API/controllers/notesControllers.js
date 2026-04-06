@@ -1,3 +1,3 @@
-exports.server = (req, res) => {
+exports.server = async (req, res) => {
     res.send("Server is running");
 }
