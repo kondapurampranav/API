@@ -14,7 +14,7 @@ exports.getAllNotes = async (req, res) => {
 } 
 
 exports.getAllNotes = async (req, res) => {
-    const { search, sort } = req.query;
+    const { search, sort, order, page, limit} = req.query;
 
     let query = "SELECT * FROM notes";
     let values = [];
@@ -27,11 +27,34 @@ exports.getAllNotes = async (req, res) => {
     const allowedSort = ["created_at", "title"];
 
     if(sort && allowedSort.includes(sort)){
-        query += ` ORDER BY ${sort} ASC`;
+        query += ` ORDER BY ${sort}`;
     }
     else {
-        query += " ORDER BY created_at DESC";
+        query += " ORDER BY created_at";
     }
+
+    const allowedOrder = ["ASC", "DESC"]
+
+    let orderValue = "ASC";
+    if(order && allowedOrder.includes(order.toUpperCase())){
+        orderValue = order.toUpperCase();
+        query += ` ${orderValue}`;
+    }
+
+    let pageNum = Number(page);
+    let limitNum = Number(limit);
+
+    if(!pageNum || pageNum < 1) pageNum = 1;
+    if(!limitNum || limitNum < 1) limitNum = 5;
+
+    let offset = (pageNum - 1) * limitNum;
+
+    query += ` LIMIT ${limitNum} OFFSET ${offset}`;
+    
+
+    console.log(query);
+    console.log(values);
+
     try {
         const [rows] = await db.execute(query, values);
         res.status(200).json(rows);
