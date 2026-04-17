@@ -4,6 +4,7 @@ const router = express.Router();
 const {
     server,
     getAllNotes,
+    getById,
     addNotes,
     updateNotes,
     deleteNotes
@@ -12,6 +13,8 @@ const {
 router.get("/", server)
 
 router.get("/notes", getAllNotes)
+
+router.get("/notes/:id", getById);
 
 router.post("/notes", addNotes)
 

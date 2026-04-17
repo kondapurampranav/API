@@ -57,10 +57,41 @@ exports.getAllNotes = async (req, res) => {
 
     try {
         const [rows] = await db.execute(query, values);
-        res.status(200).json(rows);
+        res.status(200).json({
+            data: rows,
+            page: pageNum,
+            limit: limitNum,
+            count: rows.length
+});
     }catch(err){
         res.status(500).json({ error: err.message})
     }
+}
+
+exports.getById = async(req, res) => {
+    const { id } = req.params;
+    let idNum = Number(id);
+
+    if(!id || isNaN(idNum)){
+        return res.status(400).json({ error: "id must be a number"});
+    }
+
+    let query = `SELECT * FROM notes WHERE id = ${idNum}`;
+
+    try{
+        const [rows] = await db.execute(query);
+
+        if(rows.length === 0){
+        return res.status(404).json({ error: "note not found"})
+    }
+        res.status(200).json({
+            data: rows[0]
+     })
+     
+    } catch(err) {
+        res.status(500).json({ error: err.message})
+    }
+
 }
 
 exports.addNotes = async(req, res) => {
