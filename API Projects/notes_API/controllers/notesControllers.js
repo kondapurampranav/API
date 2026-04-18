@@ -101,11 +101,11 @@ exports.addNotes = async(req, res) => {
         return res.status(400).json({ error: "All fields are required"})
     }
     if(typeof title !== "string" || !title.trim()){
-        return res.status(400).json({ error: "title and content must be a valid string "})
+        return res.status(400).json({ error: "title and content must be a valid string"})
     }
 
     if(typeof content !== "string" || !content.trim()){
-        return res.status(400).json({ error: "title and content must be a valid string "})
+        return res.status(400).json({ error: "title and content must be a valid string"})
     }
 
     try{
@@ -126,28 +126,35 @@ exports.updateNotes = async (req, res) => {
     const {title, content} = req.body;
 
     if(isNaN(id)){
-        return res.status(400).json({ error: "id must be a number "})
+        return res.status(400).json({ error: "id must be a number"})
     }
 
-    if(title == undefined || content == undefined){
+    if(title === undefined || content === undefined){
         return res.status(400).json({ error: "All fields are required"})
     }
 
     if(typeof title !== "string" || !title.trim()){
-        return res.status(400).json({ error: "title and content must be a valid string "})
+        return res.status(400).json({ error: "title must be a valid string"})
     }
 
     if(typeof content !== "string" || !content.trim()){
-        return res.status(400).json({ error: "title and content must be a valid string "})
+        return res.status(400).json({ error: "content must be a valid string"})
     }
 
     try{
         const [result] = await db.execute(
             "UPDATE notes SET title = ?,content = ? WHERE id = ?", [title.trim(), content.trim(), id]
         );
+        if(result.affectedRows === 0){
+            return res.status(404).json({ error: "note not found"})
+        }
         res.status(200).json({
-            message: "Notes updated",
-            id: id
+            message: "Note updated successfully",
+            data: {
+            id: id,
+            title: title.trim(),
+            content: content.trim()
+            }
         })
     }catch(err) {
         res.status(500).json({ error: err.message });
@@ -157,19 +164,22 @@ exports.updateNotes = async (req, res) => {
 exports.deleteNotes = async (req, res) => {
     const id = Number(req.params.id);
 
-    if(isNaN(id)){
-        return res.status(400).json({ error: "id must be a number "})
+    if(!id || isNaN(id)){
+        return res.status(400).json({ error: "id must be a number"})
     }
 
     try{
+
         const [result] = await db.execute(
             "DELETE FROM notes WHERE id = ?", [id]
         );
+        
         if(result.affectedRows === 0){
-            return res.status(404).json({ error: "note not found "})
+            return res.status(404).json({ error: "note not found"})
         }
+
         res.status(200).json({
-            message: "note deleted",
+            message: "Note deleted successfully",
             id: id
     })
     }  catch(err) {
