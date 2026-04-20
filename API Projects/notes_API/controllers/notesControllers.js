@@ -52,8 +52,8 @@ exports.getAllNotes = async (req, res) => {
     query += ` LIMIT ${limitNum} OFFSET ${offset}`;
     
 
-    console.log(query);
-    console.log(values);
+    // console.log(query);
+    // console.log(values);
 
     try {
         const [rows] = await db.execute(query, values);
@@ -158,6 +158,58 @@ exports.updateNotes = async (req, res) => {
         })
     }catch(err) {
         res.status(500).json({ error: err.message });
+    }
+}
+
+exports.updateNotesPartial = async(req, res) => {
+    const id = Number(req.params.id);
+    const { title, content } = req.body;
+
+    if(isNaN(id)){
+        return res.status(400).json({ error: "id must be a number"})
+    }
+
+    if(title === undefined && content === undefined){
+        return res.status(400).json({ error: "All fields are required"})
+    }
+    let fields = []
+    let values = []
+
+    if(title !== undefined){
+        if(typeof title !== "string" || !title.trim()){
+            return res.status(400).json({ error: "title must be a valid string"})
+        }
+        fields.push("title = ?")
+        values.push(title.trim())
+    }
+
+    if(content !== undefined){
+        if(typeof content !== "string" || !content.trim()){
+            return res.status(400).json({ error: "title must be a valid string"})
+        }
+        fields.push("content = ?")
+        values.push(content.trim())
+    }
+    let query = `UPDATE notes SET ${fields.join(", ")} WHERE id = ?`;
+    values.push(id);
+
+    try{
+        const [result] = await db.execute(query, values);
+
+        if(result.affectedRows === 0){
+            return res.status(404).json({ error: "Note not found"});
+        }
+
+        const data = { id };
+        if (title !== undefined) data.title = title.trim();
+        if (content !== undefined) data.content = content.trim();
+
+        res.status(200).json({
+            message: "Note updated successfully",
+            data: data
+        })
+    }catch(err) {
+        res.status(500).json({ error: err.message});
     }
 }
 
