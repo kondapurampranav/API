@@ -1,5 +1,6 @@
 const db = require("../config/db");
 
+
 exports.server = async (req, res) => {
     res.send("Server is running");
 }
@@ -69,17 +70,12 @@ exports.getAllNotes = async (req, res) => {
 }
 
 exports.getById = async(req, res) => {
-    const { id } = req.params;
-    let idNum = Number(id);
-
-    if(!id || isNaN(idNum)){
-        return res.status(400).json({ error: "id must be a number"});
-    }
-
-    let query = `SELECT * FROM notes WHERE id = ${idNum}`;
+    const id = req.id;
 
     try{
-        const [rows] = await db.execute(query);
+        const [rows] = await db.execute(
+            "SELECT * FROM notes WHERE id = ?", [id]
+        );
 
         if(rows.length === 0){
         return res.status(404).json({ error: "note not found"})
@@ -91,7 +87,6 @@ exports.getById = async(req, res) => {
     } catch(err) {
         res.status(500).json({ error: err.message})
     }
-
 }
 
 exports.addNotes = async(req, res) => {
@@ -122,12 +117,8 @@ exports.addNotes = async(req, res) => {
 } 
 
 exports.updateNotes = async (req, res) => {
-    const id = Number(req.params.id);
+    const id = req.id;
     const {title, content} = req.body;
-
-    if(isNaN(id)){
-        return res.status(400).json({ error: "id must be a number"})
-    }
 
     if(title === undefined || content === undefined){
         return res.status(400).json({ error: "All fields are required"})
@@ -162,12 +153,8 @@ exports.updateNotes = async (req, res) => {
 }
 
 exports.updateNotesPartial = async(req, res) => {
-    const id = Number(req.params.id);
+    const id = req.id;
     const { title, content } = req.body;
-
-    if(isNaN(id)){
-        return res.status(400).json({ error: "id must be a number"})
-    }
 
     if(title === undefined && content === undefined){
         return res.status(400).json({ error: "All fields are required"})
@@ -214,11 +201,7 @@ exports.updateNotesPartial = async(req, res) => {
 }
 
 exports.deleteNotes = async (req, res) => {
-    const id = Number(req.params.id);
-
-    if(!id || isNaN(id)){
-        return res.status(400).json({ error: "id must be a number"})
-    }
+    const id = req.id;
 
     try{
 

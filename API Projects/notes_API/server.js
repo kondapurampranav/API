@@ -9,7 +9,7 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const time = Date.now() - start;
-    console.log(`${req.method} ${req.url} ${res.statusCode} - ${time}ms`);
+    console.log(`${req.method} ${req.originalUrl} ${res.statusCode} - ${time}ms - ${req.ip}`);
   });
 
   next();
