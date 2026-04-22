@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const validateId = require("../middlewares/validateId")
+const validateId = require("../middlewares/validateId");
+const ()
 const {
     server,
     getAllNotes,

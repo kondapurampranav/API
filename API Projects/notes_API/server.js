@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 require("dotenv").config();
 
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -16,8 +17,10 @@ app.use((req, res, next) => {
 });
 
 const notesRouter = require("./routers/notesRouters");
+const errorHandler = require("./middlewares/errorHandler");
 
-app.use(notesRouter);
+app.use("/notes", notesRouter);
+app.use(errorHandler);
 
 // db connection remaining!!
 const db = require("./config/db");
@@ -31,6 +34,9 @@ const db = require("./config/db");
   }
 })();
 
+
+
 app.listen(3000, () => {
     console.log("Server is running");
 })
+

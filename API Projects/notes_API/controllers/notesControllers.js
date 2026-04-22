@@ -92,17 +92,6 @@ exports.getById = async(req, res) => {
 exports.addNotes = async(req, res) => {
     const {title, content} = req.body;
 
-    if(title == undefined || content == undefined){
-        return res.status(400).json({ error: "All fields are required"})
-    }
-    if(typeof title !== "string" || !title.trim()){
-        return res.status(400).json({ error: "title and content must be a valid string"})
-    }
-
-    if(typeof content !== "string" || !content.trim()){
-        return res.status(400).json({ error: "title and content must be a valid string"})
-    }
-
     try{
         const [result] = await db.execute(
             "INSERT INTO notes (title, content) VALUES (?, ?)", [title.trim(), content.trim()]
@@ -119,18 +108,6 @@ exports.addNotes = async(req, res) => {
 exports.updateNotes = async (req, res) => {
     const id = req.id;
     const {title, content} = req.body;
-
-    if(title === undefined || content === undefined){
-        return res.status(400).json({ error: "All fields are required"})
-    }
-
-    if(typeof title !== "string" || !title.trim()){
-        return res.status(400).json({ error: "title must be a valid string"})
-    }
-
-    if(typeof content !== "string" || !content.trim()){
-        return res.status(400).json({ error: "content must be a valid string"})
-    }
 
     try{
         const [result] = await db.execute(
@@ -156,24 +133,15 @@ exports.updateNotesPartial = async(req, res) => {
     const id = req.id;
     const { title, content } = req.body;
 
-    if(title === undefined && content === undefined){
-        return res.status(400).json({ error: "All fields are required"})
-    }
     let fields = []
     let values = []
 
     if(title !== undefined){
-        if(typeof title !== "string" || !title.trim()){
-            return res.status(400).json({ error: "title must be a valid string"})
-        }
         fields.push("title = ?")
         values.push(title.trim())
     }
 
     if(content !== undefined){
-        if(typeof content !== "string" || !content.trim()){
-            return res.status(400).json({ error: "title must be a valid string"})
-        }
         fields.push("content = ?")
         values.push(content.trim())
     }
@@ -204,7 +172,6 @@ exports.deleteNotes = async (req, res) => {
     const id = req.id;
 
     try{
-
         const [result] = await db.execute(
             "DELETE FROM notes WHERE id = ?", [id]
         );
@@ -212,12 +179,11 @@ exports.deleteNotes = async (req, res) => {
         if(result.affectedRows === 0){
             return res.status(404).json({ error: "note not found"})
         }
-
         res.status(200).json({
             message: "Note deleted successfully",
             id: id
     })
-    }  catch(err) {
+    } catch(err) {
         res.status(500).json({ error: err.message})
         }
     }
