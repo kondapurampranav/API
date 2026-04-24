@@ -17,10 +17,10 @@ app.use((req, res, next) => {
 });
 
 const notesRouter = require("./routers/notesRouters");
-const errorHandler = require("./middlewares/errorHandler");
+// const errorHandler = require("./middlewares/errorHandler");
 
-app.use("/notes", notesRouter);
-app.use(errorHandler);
+app.use(notesRouter);
+// app.use(errorHandler);
 
 // db connection remaining!!
 const db = require("./config/db");
