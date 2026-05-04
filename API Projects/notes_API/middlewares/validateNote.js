@@ -5,11 +5,11 @@ const isValidateString = (value) => {
 const validateNote = (req, res, next) => {
     const { title, content } = req.body;
 
-    if (!isValidString(title)) {
+    if (!isValidateString(title)) {
         return res.status(400).json({ error: "title must be a valid string"});
     }
 
-    if (!isValidString(content)) {
+    if (!isValidateString(content)) {
         return res.status(400).json({ error: "content must be a valid string"});
     }
     next();

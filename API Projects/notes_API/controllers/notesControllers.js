@@ -5,23 +5,14 @@ exports.server = async (req, res) => {
     res.send("Server is running");
 }
 
-exports.getAllNotes = async (req, res) => {
-    try{
-        const [rows] = await db.execute("SELECT * FROM NOTES");
-        res.json(rows);
-    } catch(err) {
-        res.status(404).json({ error: err.message });
-    }
-} 
-
-exports.getAllNotes = async (req, res) => {
+exports.getAllNotes = async (req, res, next) => {
     const { search, sort, order, page, limit} = req.query;
 
-    let query = "SELECT * FROM notes";
-    let values = [];
+    let query = "SELECT * FROM notes WHERE user_id = ?";
+    let values = [req.userId];
 
     if(search){
-        query += " WHERE title LIKE ?";
+        query += " AND title LIKE ?";
         values.push(`%${search}%`)
     }
 
@@ -51,7 +42,6 @@ exports.getAllNotes = async (req, res) => {
     let offset = (pageNum - 1) * limitNum;
 
     query += ` LIMIT ${limitNum} OFFSET ${offset}`;
-    
 
     // console.log(query);
     // console.log(values);
@@ -65,56 +55,60 @@ exports.getAllNotes = async (req, res) => {
             count: rows.length
 });
     }catch(err){
-        res.status(500).json({ error: err.message})
+        next(err);
     }
 }
 
-exports.getById = async(req, res) => {
+exports.getById = async(req, res, next) => {
     const id = req.id;
 
     try{
         const [rows] = await db.execute(
-            "SELECT * FROM notes WHERE id = ?", [id]
+            "SELECT * FROM notes WHERE id = ? AND user_id = ?", [id, req.userId]
         );
 
         if(rows.length === 0){
-        return res.status(404).json({ error: "note not found"})
+            const err = new Error("Note not found");
+            err.status = 404;
+            return next(err);
     }
         res.status(200).json({
             data: rows[0]
      })
      
     } catch(err) {
-        res.status(500).json({ error: err.message})
+        next(err);
     }
 }
 
-exports.addNotes = async(req, res) => {
+exports.addNotes = async(req, res, next) => {
     const {title, content} = req.body;
 
     try{
         const [result] = await db.execute(
-            "INSERT INTO notes (title, content) VALUES (?, ?)", [title.trim(), content.trim()]
+            "INSERT INTO notes (title, content, user_id) VALUES (?, ?, ?)", [title.trim(), content.trim(), req.userId]
         );
         res.status(201).json({
             message: "Notes added",
             id: result.insertId
         });
     } catch(err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 } 
 
-exports.updateNotes = async (req, res) => {
+exports.updateNotes = async (req, res, next) => {
     const id = req.id;
     const {title, content} = req.body;
 
     try{
         const [result] = await db.execute(
-            "UPDATE notes SET title = ?,content = ? WHERE id = ?", [title.trim(), content.trim(), id]
+            "UPDATE notes SET title = ?,content = ? WHERE id = ? AND user_id = ?", [title.trim(), content.trim(), id, req.userId]
         );
         if(result.affectedRows === 0){
-            return res.status(404).json({ error: "note not found"})
+            const err = new Error("Note not found");
+            err.status = 404;
+            return next(err);
         }
         res.status(200).json({
             message: "Note updated successfully",
@@ -125,11 +119,11 @@ exports.updateNotes = async (req, res) => {
             }
         })
     }catch(err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 }
 
-exports.updateNotesPartial = async(req, res) => {
+exports.updateNotesPartial = async(req, res, next) => {
     const id = req.id;
     const { title, content } = req.body;
 
@@ -152,7 +146,9 @@ exports.updateNotesPartial = async(req, res) => {
         const [result] = await db.execute(query, values);
 
         if(result.affectedRows === 0){
-            return res.status(404).json({ error: "Note not found"});
+            const err = new Error("Note not found");
+            err.status = 404;
+            return next(err);
         }
 
         const data = { id };
@@ -164,26 +160,28 @@ exports.updateNotesPartial = async(req, res) => {
             data: data
         })
     }catch(err) {
-        res.status(500).json({ error: err.message});
+        next(err);
     }
 }
 
-exports.deleteNotes = async (req, res) => {
+exports.deleteNotes = async (req, res, next) => {
     const id = req.id;
 
     try{
         const [result] = await db.execute(
-            "DELETE FROM notes WHERE id = ?", [id]
+            "DELETE FROM notes WHERE id = ? AND user_id = ?", [id, req.userId]
         );
         
         if(result.affectedRows === 0){
-            return res.status(404).json({ error: "note not found"})
+            const err = new Error("Note not found");
+            err.status = 404;
+            return next(err);
         }
         res.status(200).json({
             message: "Note deleted successfully",
             id: id
     })
     } catch(err) {
-        res.status(500).json({ error: err.message})
+        next(err);
         }
     }

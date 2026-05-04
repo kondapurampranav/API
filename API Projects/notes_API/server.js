@@ -16,11 +16,15 @@ app.use((req, res, next) => {
   next();
 });
 
-const notesRouter = require("./routers/notesRouters");
-// const errorHandler = require("./middlewares/errorHandler");
 
+const notesRouter = require("./routers/notesRouters");
+const authRoutes = require("./routers/authRouters");
+
+app.use("/auth", authRoutes);
 app.use(notesRouter);
-// app.use(errorHandler);
+
+const errorHandler = require("./middlewares/errorHandler");
+app.use(errorHandler);
 
 // db connection remaining!!
 const db = require("./config/db");
@@ -33,8 +37,6 @@ const db = require("./config/db");
     console.error("DB error:", e.message);
   }
 })();
-
-
 
 app.listen(3000, () => {
     console.log("Server is running");

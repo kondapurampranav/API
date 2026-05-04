@@ -12,6 +12,8 @@ const {
     deleteNotes
 } = require("../controllers/notesControllers");
 const { validateNote, validateNotePartial} = require("../middlewares/validateNote");
+const auth = require("../middlewares/authMiddleware");
+router.use(auth);
 
 router.get("/", server);
 
