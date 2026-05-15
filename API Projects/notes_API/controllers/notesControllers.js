@@ -1,6 +1,6 @@
 const db = require("../config/db");
-const ApiError = require("../utils/ApiError");
-const asyncHandler = require("../utils/asyncHandler");
+const ApiError = require("../../../utils/ApiError");
+const asyncHandler = require("../../../utils/asyncHandler");
 
 exports.server = async (req, res) => {
     res.send("Server is running");
