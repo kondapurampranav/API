@@ -1,16 +1,20 @@
 const isValidateString = (value) => {
-    return typeof value === "string" && value.trim();
+    return typeof value === "string" && value.trim() > 0;
 }
 
 const validateNote = (req, res, next) => {
     const { title, content } = req.body;
 
     if (!isValidateString(title)) {
-        return res.status(400).json({ error: "title must be a valid string"});
+        const err = new Error("title must be a valid string");
+        err.status = 400;
+        return next(err);
     }
 
     if (!isValidateString(content)) {
-        return res.status(400).json({ error: "content must be a valid string"});
+        const err = new Error("Content must be a valid string");
+        err.status = 400;
+        return next(err);
     }
     next();
 }
@@ -19,15 +23,21 @@ const validateNotePartial = (req, res, next) => {
     const { title, content } = req.body;
 
     if(title === undefined && content === undefined){
-        return res.status(400).json({ error: "At least one field required"});
+        const err = new Error("At least one field required");
+        err.status = 400;
+        return next(err);
     }
 
     if(title !== undefined && !isValidateString(title)){
-        return res.status(400).json({ error: "title must be a valid string"});
+        const err = new Error("Title must be a valid string");
+        err.status = 400;
+        return next(err);
     }
 
     if(content !== undefined && !isValidateString(content)){
-        return res.status(400).json({ error: "content must be a valid string"});
+        const err = new Error("Content must be a valid string");
+        err.status = 400;
+        return next(err);
     }
     next();
 };

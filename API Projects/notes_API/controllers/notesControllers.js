@@ -1,11 +1,12 @@
 const db = require("../config/db");
-
+const ApiError = require("../utils/ApiError");
+const asyncHandler = require("../utils/asyncHandler");
 
 exports.server = async (req, res) => {
     res.send("Server is running");
 }
 
-exports.getAllNotes = async (req, res, next) => {
+exports.getAllNotes = asyncHandler(async(req, res, next) => {
     const { search, sort, order, page, limit} = req.query;
 
     let query = "SELECT * FROM notes WHERE user_id = ?";
@@ -45,8 +46,6 @@ exports.getAllNotes = async (req, res, next) => {
 
     // console.log(query);
     // console.log(values);
-
-    try {
         const [rows] = await db.execute(query, values);
         res.status(200).json({
             data: rows,
@@ -54,10 +53,7 @@ exports.getAllNotes = async (req, res, next) => {
             limit: limitNum,
             count: rows.length
 });
-    }catch(err){
-        next(err);
-    }
-}
+});
 
 exports.getById = async(req, res, next) => {
     const id = req.id;
@@ -68,9 +64,7 @@ exports.getById = async(req, res, next) => {
         );
 
         if(rows.length === 0){
-            const err = new Error("Note not found");
-            err.status = 404;
-            return next(err);
+            throw new ApiError(404, "Note not found");
     }
         res.status(200).json({
             data: rows[0]
